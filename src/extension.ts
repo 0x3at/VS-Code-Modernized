@@ -193,18 +193,22 @@ async function applyStyles() {
 
         // Get URIs for the extension's CSS and JS files
         const stylesUri = vscode.Uri.joinPath(extensionContext.extensionUri, 'styles', 'styles.css');
-        const scriptUri = vscode.Uri.joinPath(extensionContext.extensionUri, 'styles', 'quickInputWidget.js');
-        // Note: Reading baseCss and scriptJs here isn't strictly necessary for injection,
+        const quickInputScriptUri = vscode.Uri.joinPath(extensionContext.extensionUri, 'styles', 'quickInputWidget.js');
+        const layoutFixerScriptUri = vscode.Uri.joinPath(extensionContext.extensionUri, 'src', 'layoutFixer.js');
+
+        // Note: Reading file contents here isn't strictly necessary for injection via src/href,
         // but could be useful for validation or future modifications.
         // const baseCss = await readFile(stylesUri);
-        // const scriptJs = await readFile(scriptUri);
+        // const quickInputScriptJs = await readFile(quickInputScriptUri);
+        // const layoutFixerScriptJs = await readFile(layoutFixerScriptUri);
 
         // Generate dynamic CSS based on user settings
         const dynamicCss = generateDynamicCss();
 
         // Convert file URIs to vscode-file URIs suitable for injection into workbench.html
         const stylesHref = stylesUri.with({ scheme: 'vscode-file', authority: 'vscode-app' }).toString();
-        const scriptSrc = scriptUri.with({ scheme: 'vscode-file', authority: 'vscode-app' }).toString();
+        const quickInputScriptSrc = quickInputScriptUri.with({ scheme: 'vscode-file', authority: 'vscode-app' }).toString();
+        const layoutFixerScriptSrc = layoutFixerScriptUri.with({ scheme: 'vscode-file', authority: 'vscode-app' }).toString();
 
         // Construct the HTML block to inject
         const injectionContent = `
@@ -213,8 +217,10 @@ ${INJECTION_MARKER_START}
   <link rel="stylesheet" href="${stylesHref}">
   <!-- Dynamic Styles based on settings -->
   ${dynamicCss}
-  <!-- Custom Script -->
-  <script src="${scriptSrc}"></script>
+  <!-- Custom Script for Quick Input -->
+  <script src="${quickInputScriptSrc}"></script>
+  <!-- Custom Script for Layout Fixes -->
+  <script src="${layoutFixerScriptSrc}"></script>
 ${INJECTION_MARKER_END}
 `;
 
